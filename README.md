@@ -21,8 +21,8 @@ A simple Java webapp with embedded Eclipse Jetty server.
 1. Download code `git clone https://github.com/amdelamar/embedded-jetty`
 1. `cd embedded-jetty`
 1. Run build `./gradlew clean build`
-1. Build image `docker build -t spark .`
-1. Run container `docker run -p 8080:8080 spark`
+1. Build image `docker build -t embjetty .`
+1. Run container `docker run -p 8080:8080 embjetty`
 1. Visit [http://localhost:8080/](http://localhost:8080/) to see the app running.
 
 ## License
