@@ -61,7 +61,9 @@ public class HttpsServer {
         sslContextFactory.setKeyManagerPassword("changeit");
         sslContextFactory.setTrustStorePath(workingDir+"/deploy/keystore.jks");
         sslContextFactory.setTrustStorePassword("changeit");
-        sslContextFactory.setExcludeCipherSuites("^.*_(MD5|DES|SHA1){1}$");
+        sslContextFactory.setIncludeProtocols("TLSv1.2");
+        sslContextFactory.setExcludeProtocols("TLSv1","TLSv1.1"); // force tls1.2
+        sslContextFactory.setExcludeCipherSuites("(MD5|DES|SHA|SHA1)$"); // dont allow weak ciphers
 
         // HTTPS Configuration
         HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
