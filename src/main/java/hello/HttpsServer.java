@@ -1,24 +1,42 @@
 package hello;
 
-import org.eclipse.jetty.http.HttpVersion;
+import org.eclipse.jetty.http.HttpScheme;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.SslConnectionFactory;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.SecuredRedirectHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpsServer {
 
+    private static final Logger logger = LoggerFactory.getLogger(HttpsServer.class);
+
     public static void main(String[] args) throws Exception {
-        
+
+        // HTTP Configuration
+        HttpConfiguration httpConfig = new HttpConfiguration();
+        httpConfig.setSecureScheme(HttpScheme.HTTPS.asString());
+        httpConfig.setSecurePort(8443);
+        //httpConfig.setSendServerVersion(false);
+        //httpConfig.setSendDateHeader(false);
+
+        // HTTPS Configuration
+        HttpConfiguration httpsConfig = new HttpConfiguration();
+        httpsConfig.addCustomizer(new SecureRequestCustomizer());
+        // config.addCustomizer(new ForwardedRequestCustomizer());
+
+        // Protocols
+        HttpConnectionFactory http = new HttpConnectionFactory(httpConfig);
+        HttpConnectionFactory https = new HttpConnectionFactory(httpsConfig);
+
         // Setup Threadpool
         QueuedThreadPool threadPool = new QueuedThreadPool();
         threadPool.setMaxThreads(500);
@@ -28,62 +46,45 @@ public class HttpsServer {
         // New Server
         Server server = new Server(threadPool);
 
-        // HTTP Configuration
-        HttpConfiguration httpConfig = new HttpConfiguration();
-        httpConfig.setSecureScheme("https");
-        httpConfig.setSecurePort(8443);
-        httpConfig.setOutputBufferSize(32768);
-        httpConfig.setRequestHeaderSize(8192);
-        httpConfig.setResponseHeaderSize(8192);
-        httpConfig.setSendServerVersion(true);
-        httpConfig.setSendDateHeader(false);
-        // httpConfig.addCustomizer(new ForwardedRequestCustomizer());
-
-        // Handler Structure
-        HandlerCollection handlers = new HandlerCollection();
-        ContextHandlerCollection contexts = new ContextHandlerCollection();
-        handlers.setHandlers(new Handler[] { contexts, new DefaultHandler() });
-        server.setHandler(handlers);
-        
-        // HTTP Configuration
-        ServerConnector httpConnector = new ServerConnector(server,
-                new HttpConnectionFactory(httpConfig));
-        httpConnector.setPort(8080);
-        httpConnector.setIdleTimeout(30000);
-        server.addConnector(httpConnector);
-        
         // SSL Configuration
         // https://www.eclipse.org/jetty/documentation/current/configuring-ssl.html
         String workingDir = System.getProperty("user.dir");
-        SslContextFactory sslContextFactory = new SslContextFactory();
-        sslContextFactory.setKeyStorePath(workingDir+"/deploy/keystore.jks");
-        sslContextFactory.setKeyStorePassword("changeit");
-        sslContextFactory.setKeyManagerPassword("changeit");
-        sslContextFactory.setTrustStorePath(workingDir+"/deploy/keystore.jks");
-        sslContextFactory.setTrustStorePassword("changeit");
-        sslContextFactory.setIncludeProtocols("TLSv1.2");
-        sslContextFactory.setExcludeProtocols("TLSv1","TLSv1.1"); // force tls1.2
-        sslContextFactory.setExcludeCipherSuites("(MD5|DES|SHA|SHA1)$"); // dont allow weak ciphers
+        SslContextFactory ssl = new SslContextFactory();
+        ssl.setKeyStorePath(workingDir + "/deploy/keystore.jks");
+        ssl.setKeyStorePassword("changeit");
+        ssl.setKeyManagerPassword("changeit");
+        ssl.setTrustStorePath(workingDir + "/deploy/keystore.jks");
+        ssl.setTrustStorePassword("changeit");
+        ssl.setUseCipherSuitesOrder(true);
+        ssl.setIncludeProtocols("TLSv1.2");
+        ssl.setExcludeProtocols("TLSv1", "TLSv1.1"); // force tls1.2
+        ssl.setExcludeCipherSuites("(MD5|DES|SHA|SHA1)$"); // dont allow weak ciphers
 
-        // HTTPS Configuration
-        HttpConfiguration httpsConfig = new HttpConfiguration(httpConfig);
-        httpsConfig.addCustomizer(new SecureRequestCustomizer());
+        // Add Connectors
+        ServerConnector connector = new ServerConnector(server, http);
+        connector.setName("unsecured");
+        connector.setPort(8080);
+        server.addConnector(connector);
 
-        // SSL Connector
-        ServerConnector httpsConnector = new ServerConnector(server,
-            new SslConnectionFactory(sslContextFactory,HttpVersion.HTTP_1_1.asString()),
-            new HttpConnectionFactory(httpsConfig));
-        httpsConnector.setPort(8443);
-        server.addConnector(httpsConnector);
+        ServerConnector connector2 = new ServerConnector(server, ssl, https);
+        connector2.setName("secured");
+        connector2.setPort(8443);
+        server.addConnector(connector2);
 
         // Add our Servlet
         ServletHandler handler = new ServletHandler();
-        server.setHandler(handler);
         handler.addServletWithMapping(HelloServlet.class, "/*");
+
+        // Handler Collection
+        // SecuredRedirectHandler redirects HTTP to HTTPS
+        HandlerCollection handlers = new HandlerCollection();
+        handlers.setHandlers(new Handler[] { new SecuredRedirectHandler(), handler });
+        server.setHandler(handlers);
 
         // Start Server
         server.start();
         server.join();
+        logger.debug("Jetty Server Started");
     }
 
 }

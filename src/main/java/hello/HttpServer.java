@@ -2,8 +2,12 @@ package hello;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpServer {
+
+    private static final Logger logger = LoggerFactory.getLogger(HttpServer.class);
 
     public static void main(String[] args) throws Exception {
         // Create a basic jetty server object that will listen on port 8080.
@@ -34,6 +38,7 @@ public class HttpServer {
         // See
         // http://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html#join()
         server.join();
+        logger.debug("Jetty Server Started");
     }
 
 }

@@ -26,10 +26,16 @@ repositories {
 }
 
 dependencies {
+	// jetty dependencies
     compile 'org.eclipse.jetty:jetty-server:9.4.+'
     compile 'org.eclipse.jetty:jetty-servlet:9.4.+'
     
-    compile 'org.slf4j:slf4j-api:1.7.24'
+    // http2 dependencies
+    compile 'org.eclipse.jetty.http2:http2-server:9.4.+'
+    compile 'org.eclipse.jetty:jetty-alpn-server:9.4.+'
+    
+    compile 'org.slf4j:slf4j-api:1.7.+'
+    compile 'org.slf4j:slf4j-simple:1.7.+'
 
     testCompile 'junit:junit:4.12'
 }

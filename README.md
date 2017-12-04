@@ -1,6 +1,6 @@
 # Embedded-Jetty
 
-A simple Java webapp with embedded Eclipse Jetty server.
+A simple Java servlet with embedded Eclipse Jetty server. (HTTP/1.1, HTTP/2, and SSL)
 
 ## Prerequisites
 
