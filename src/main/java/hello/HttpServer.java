@@ -3,7 +3,7 @@ package hello;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 
-public class EmbeddedJetty {
+public class HttpServer {
 
     public static void main(String[] args) throws Exception {
         // Create a basic jetty server object that will listen on port 8080.

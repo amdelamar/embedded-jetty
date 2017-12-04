@@ -17,7 +17,7 @@ apply plugin: "com.github.johnrengelman.plugin-shadow"
 group 'com.amdelamar'
 version = '0.1.0'
 jar.baseName = 'embedded-jetty'
-mainClassName = 'hello.EmbeddedJetty'
+mainClassName = 'hello.HttpsServer'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
