@@ -12,7 +12,8 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.server.handler.SecuredRedirectHandler;
-import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.slf4j.Logger;
@@ -80,14 +81,21 @@ public class Http2Server {
         connector2.setPort(8443);
         server.addConnector(connector2);
 
-        // Add our Servlet
-        ServletHandler handler = new ServletHandler();
-        handler.addServletWithMapping(HelloServlet.class, "/*");
+        // Servlet Context path
+        ServletContextHandler contextHandler = new ServletContextHandler();
+        contextHandler.setContextPath("/");
+
+        // Add our Async Servlet
+        ServletHolder asyncHolder = contextHandler.addServlet(AsyncServlet.class, "/async");
+        asyncHolder.setAsyncSupported(true);
+
+        // Add our Hello Servlet
+        contextHandler.addServlet(HelloServlet.class, "/");
 
         // Handler Collection
         // SecuredRedirectHandler redirects HTTP to HTTPS
         HandlerCollection handlers = new HandlerCollection();
-        handlers.setHandlers(new Handler[] { new SecuredRedirectHandler(), handler });
+        handlers.setHandlers(new Handler[] { new SecuredRedirectHandler(), contextHandler });
         server.setHandler(handlers);
 
         // Start Server

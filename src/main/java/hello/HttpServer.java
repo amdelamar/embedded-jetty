@@ -1,7 +1,8 @@
 package hello;
 
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,21 +17,22 @@ public class HttpServer {
         // or programmatically obtain it for use in test cases.
         Server server = new Server(8080);
 
-        // The ServletHandler is a dead simple way to create a context handler
-        // that is backed by an instance of a Servlet.
-        // This handler then needs to be registered with the Server object.
-        ServletHandler handler = new ServletHandler();
-        server.setHandler(handler);
+        // Servlet Context path
+        ServletContextHandler contextHandler = new ServletContextHandler();
+        contextHandler.setContextPath("/");
 
-        // Passing in the class for the Servlet allows jetty to instantiate an
-        // instance of that Servlet and mount it on a given context path.
+        // Add our Async Servlet
+        ServletHolder asyncHolder = contextHandler.addServlet(AsyncServlet.class, "/async");
+        asyncHolder.setAsyncSupported(true);
 
-        // IMPORTANT:
-        // This is a raw Servlet, not a Servlet that has been configured
-        // through a web.xml @WebServlet annotation, or anything similar.
-        handler.addServletWithMapping(HelloServlet.class, "/*");
+        // Add our Hello Servlet
+        contextHandler.addServlet(HelloServlet.class, "/");
+
+        // Set Context Handler
+        server.setHandler(contextHandler);
 
         // Start things up!
+        logger.debug("Jetty Server Started");
         server.start();
 
         // The use of server.join() the will make the current thread join and
@@ -38,7 +40,6 @@ public class HttpServer {
         // See
         // http://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html#join()
         server.join();
-        logger.debug("Jetty Server Started");
     }
 
 }

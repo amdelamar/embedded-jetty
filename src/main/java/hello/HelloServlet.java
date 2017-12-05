@@ -21,14 +21,13 @@ public class HelloServlet extends HttpServlet {
         response.setStatus(HttpServletResponse.SC_OK);
 
         String hello = "Hello from Jetty!";
-        String content = request.getProtocol() + " | " + 
-                request.getScheme().toUpperCase();
-        
-        logger.info(hello+" "+content);
-        
+        String content = request.getProtocol() + " | " + request.getScheme()
+                .toUpperCase();
+
+        logger.info(hello + " " + content);
+
         response.getWriter()
-                .println("<div style=\"padding:50px;text-align:center;\"><h1>"+hello+"</h1><p><code>" + content
-                        + "</code></p></div>");
+                .println("<div style=\"padding:50px;text-align:center;\"><h1>" + hello + "</h1><p><code>" + content + "</code></p></div>");
     }
 
 }
