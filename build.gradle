@@ -8,25 +8,27 @@ buildscript {
     }
   }
   dependencies {
-    classpath "com.github.jengelman.gradle.plugins:shadow:2.0.0"
+    classpath "com.github.jengelman.gradle.plugins:shadow:2.0.1"
   }
 }
 
-apply plugin: "com.github.johnrengelman.plugin-shadow"
+apply plugin: "com.github.johnrengelman.shadow"
 
-group 'com.amdelamar'
+group = 'com.amdelamar'
 version = '0.1.0'
 jar.baseName = 'embedded-jetty'
+jar.enabled = false
 mainClassName = 'hello.HttpsServer'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+compileJava.options.encoding = 'UTF-8'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-	// jetty dependencies
+    // jetty dependencies
     compile 'org.eclipse.jetty:jetty-server:9.4.+'
     compile 'org.eclipse.jetty:jetty-servlet:9.4.+'
     
@@ -39,4 +41,8 @@ dependencies {
     compile 'org.slf4j:slf4j-simple:1.7.+'
 
     testCompile 'junit:junit:4.12'
+}
+
+shadowJar {
+    classifier = null
 }

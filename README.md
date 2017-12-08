@@ -13,7 +13,7 @@ A simple Java servlet with embedded Eclipse Jetty server. (HTTP/1.1, HTTP/2, and
 1. Download code `git clone https://github.com/amdelamar/embedded-jetty`
 1. `cd embedded-jetty`
 1. Run build `./gradlew clean build`
-1. Start server `java -jar build/libs/embedded-jetty-0.1.0-all.jar`
+1. Start server `java -jar build/libs/embedded-jetty-0.1.0.jar`
 1. Visit [http://localhost:8080/](http://localhost:8080/) to see the app running.
 
 ## Run in Docker
